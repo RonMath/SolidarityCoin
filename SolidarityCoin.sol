@@ -1,34 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20SnapshotUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20FlashMintUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Snapshot.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20FlashMint.sol";
 
 /// @custom:security-contact sec@solicoin.org
-contract SolidarityCoin is Initializable, ERC20Upgradeable, ERC20BurnableUpgradeable, ERC20SnapshotUpgradeable, AccessControlUpgradeable, PausableUpgradeable, ERC20PermitUpgradeable, ERC20VotesUpgradeable, ERC20FlashMintUpgradeable {
+contract SolidarityCoin is ERC20, ERC20Burnable, ERC20Snapshot, AccessControl, Pausable, ERC20Permit, ERC20Votes, ERC20FlashMint {
     bytes32 public constant SNAPSHOT_ROLE = keccak256("SNAPSHOT_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() initializer {}
-
-    function initialize() initializer public {
-        __ERC20_init("SolidarityCoin", "SOLI");
-        __ERC20Burnable_init();
-        __ERC20Snapshot_init();
-        __AccessControl_init();
-        __Pausable_init();
-        __ERC20Permit_init("SolidarityCoin");
-        __ERC20FlashMint_init();
-
+    constructor() ERC20("SolidarityCoin", "SOLI") ERC20Permit("SolidarityCoin") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(SNAPSHOT_ROLE, msg.sender);
         _grantRole(PAUSER_ROLE, msg.sender);
@@ -55,7 +43,7 @@ contract SolidarityCoin is Initializable, ERC20Upgradeable, ERC20BurnableUpgrade
     function _beforeTokenTransfer(address from, address to, uint256 amount)
         internal
         whenNotPaused
-        override(ERC20Upgradeable, ERC20SnapshotUpgradeable)
+        override(ERC20, ERC20Snapshot)
     {
         super._beforeTokenTransfer(from, to, amount);
     }
@@ -64,21 +52,21 @@ contract SolidarityCoin is Initializable, ERC20Upgradeable, ERC20BurnableUpgrade
 
     function _afterTokenTransfer(address from, address to, uint256 amount)
         internal
-        override(ERC20Upgradeable, ERC20VotesUpgradeable)
+        override(ERC20, ERC20Votes)
     {
         super._afterTokenTransfer(from, to, amount);
     }
 
     function _mint(address to, uint256 amount)
         internal
-        override(ERC20Upgradeable, ERC20VotesUpgradeable)
+        override(ERC20, ERC20Votes)
     {
         super._mint(to, amount);
     }
 
     function _burn(address account, uint256 amount)
         internal
-        override(ERC20Upgradeable, ERC20VotesUpgradeable)
+        override(ERC20, ERC20Votes)
     {
         super._burn(account, amount);
     }
